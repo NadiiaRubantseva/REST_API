@@ -11,7 +11,7 @@ This project is a **RESTful API** for managing items, designed with **Spring Boo
 
 ---
 ## 📖 **API Documentation**
-The API is fully documented in **Postman**. You can access the documentation [here](https://documenter.getpostman.com/view/23244926/2sAYX9kzgY#38b23cfc-00b0-478a-b1c4-bd48f637a7b4).
+The API is fully documented in **Postman**. You can access the documentation [here](https://documenter.getpostman.com/view/23244926/2sAYX9kzgY).
 
 ---
 
