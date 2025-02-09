@@ -1,5 +1,5 @@
-package ua.edu.ztu.nadiiarubantseva.restapi.item;
+package ua.edu.ztu.nadiiarubantseva.restapi.common;
 
 public interface ErrorCode {
-    String name(); // Ensures all enums provide a name
+    String name();
 }

@@ -1,17 +1,3 @@
-package ua.edu.ztu.nadiiarubantseva.restapi.item;
+package ua.edu.ztu.nadiiarubantseva.restapi.item.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@NoArgsConstructor
-@AllArgsConstructor
-@Data
-@Builder
-public class ItemDTO {
-    private Long id;
-    private String name;
-    private String description;
-    private double price;
-}
+public record ItemDTO(long id, String name, String description, double price) {}

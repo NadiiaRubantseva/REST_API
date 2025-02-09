@@ -1,7 +1,8 @@
-package ua.edu.ztu.nadiiarubantseva.restapi.security;
+package ua.edu.ztu.nadiiarubantseva.restapi.security.auth.validator;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import ua.edu.ztu.nadiiarubantseva.restapi.security.auth.dto.LoginRequest;
 import ua.edu.ztu.nadiiarubantseva.restapi.user.repository.UserRepository;
 
 import java.util.Optional;

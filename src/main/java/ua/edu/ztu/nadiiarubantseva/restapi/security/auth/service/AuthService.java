@@ -1,4 +1,4 @@
-package ua.edu.ztu.nadiiarubantseva.restapi.security;
+package ua.edu.ztu.nadiiarubantseva.restapi.security.auth.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -7,6 +7,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import ua.edu.ztu.nadiiarubantseva.restapi.common.ApiException;
+import ua.edu.ztu.nadiiarubantseva.restapi.security.auth.validator.AuthErrorCode;
+import ua.edu.ztu.nadiiarubantseva.restapi.security.jwt.JwtUtil;
+import ua.edu.ztu.nadiiarubantseva.restapi.security.auth.dto.LoginRequest;
+import ua.edu.ztu.nadiiarubantseva.restapi.security.auth.dto.LoginResponse;
+import ua.edu.ztu.nadiiarubantseva.restapi.security.auth.validator.AuthValidator;
 
 import java.util.Optional;
 

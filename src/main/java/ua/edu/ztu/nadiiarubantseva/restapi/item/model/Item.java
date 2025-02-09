@@ -1,4 +1,4 @@
-package ua.edu.ztu.nadiiarubantseva.restapi.item;
+package ua.edu.ztu.nadiiarubantseva.restapi.item.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

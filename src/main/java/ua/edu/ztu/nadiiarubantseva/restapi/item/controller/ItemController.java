@@ -1,52 +1,67 @@
-package ua.edu.ztu.nadiiarubantseva.restapi.item;
+package ua.edu.ztu.nadiiarubantseva.restapi.item.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ua.edu.ztu.nadiiarubantseva.restapi.common.ApiResponse;
+import ua.edu.ztu.nadiiarubantseva.restapi.item.dto.ItemCreateRequest;
+import ua.edu.ztu.nadiiarubantseva.restapi.item.dto.ItemDTO;
+import ua.edu.ztu.nadiiarubantseva.restapi.item.dto.ItemPutRequest;
+import ua.edu.ztu.nadiiarubantseva.restapi.item.dto.ItemUpdateRequest;
+import ua.edu.ztu.nadiiarubantseva.restapi.item.service.ItemService;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/items")
+@RequestMapping("/api/v1/items")
 @RequiredArgsConstructor
+@Validated
 public class ItemController {
+
     private final ItemService itemService;
 
-    @PostMapping
-    public ResponseEntity<ApiResponse<Item, ?>> createItem(@RequestBody ItemRequestDto request) {
-        return ResponseEntity.ok(ApiResponse.success(itemService.createItem(request)));
-    }
-
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Item>, ?>> getAllItems() {
+    @PreAuthorize("hasAnyAuthority(" +
+                  "T(ua.edu.ztu.nadiiarubantseva.restapi.user.model.Role).ADMIN.name()," +
+                  "T(ua.edu.ztu.nadiiarubantseva.restapi.user.model.Role).USER.name())")
+    public ResponseEntity<ApiResponse<List<ItemDTO>, ?>> getAllItems() {
         return ResponseEntity.ok(ApiResponse.success(itemService.getAllItems()));
     }
 
+    @PostMapping
+    @PreAuthorize("hasAuthority(T(ua.edu.ztu.nadiiarubantseva.restapi.user.model.Role).ADMIN.name())")
+    public ResponseEntity<ApiResponse<ItemDTO, ?>> createItem(@RequestBody ItemCreateRequest request) {
+        return ResponseEntity.ok(ApiResponse.success(itemService.createItem(request)));
+    }
+
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Item, ItemErrorCode>> getItemById(@PathVariable Long id) {
-        try {
-            return ResponseEntity.ok(ApiResponse.success(itemService.getItemById(id)));
-        } catch (ItemNotFoundException e) {
-            return ResponseEntity.badRequest().body(ApiResponse.failure(e.getErrorCode()));
-        }
+    @PreAuthorize("hasAnyAuthority(" +
+                  "T(ua.edu.ztu.nadiiarubantseva.restapi.user.model.Role).ADMIN.name()," +
+                  "T(ua.edu.ztu.nadiiarubantseva.restapi.user.model.Role).USER.name())")
+    public ResponseEntity<ApiResponse<ItemDTO, ?>> getItemById(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(itemService.getItemById(id)));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Item, ItemErrorCode>> updateItem(@PathVariable Long id, @RequestBody ItemRequestDto request) {
-        try {
-            return ResponseEntity.ok(ApiResponse.success(itemService.updateItem(id, request)));
-        } catch (ItemNotFoundException e) {
-            return ResponseEntity.badRequest().body(ApiResponse.failure(e.getErrorCode()));
-        }
+    @PreAuthorize("hasAuthority(T(ua.edu.ztu.nadiiarubantseva.restapi.user.model.Role).ADMIN.name())")
+    public ResponseEntity<ApiResponse<ItemDTO, ?>> replaceItem(@PathVariable Long id,
+                                                               @RequestBody ItemPutRequest request) {
+        return ResponseEntity.ok(ApiResponse.success(itemService.replaceItem(id, request)));
+    }
+
+    @PatchMapping("/{id}")
+    @PreAuthorize("hasAuthority(T(ua.edu.ztu.nadiiarubantseva.restapi.user.model.Role).ADMIN.name())")
+    public ResponseEntity<ApiResponse<ItemDTO, ?>> updateItem(@PathVariable Long id,
+                                                              @RequestBody ItemUpdateRequest request) {
+        return ResponseEntity.ok(ApiResponse.success(itemService.updateItem(id, request)));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void, ItemErrorCode>> deleteItem(@PathVariable Long id) {
-        try {
-            itemService.deleteItem(id);
-            return ResponseEntity.ok(ApiResponse.success(null));
-        } catch (ItemNotFoundException e) {
-            return ResponseEntity.badRequest().body(ApiResponse.failure(e.getErrorCode()));
-        }
+    @PreAuthorize("hasAuthority(T(ua.edu.ztu.nadiiarubantseva.restapi.user.model.Role).ADMIN.name())")
+    public ResponseEntity<ApiResponse<String, ?>> deleteItem(@PathVariable Long id) {
+        itemService.deleteItem(id);
+        return ResponseEntity.ok(ApiResponse.success("Item deleted successfully"));
     }
 }

@@ -1,3 +1,3 @@
 package ua.edu.ztu.nadiiarubantseva.restapi.item.dto;
 
-public record ItemCreateRequest(String name, String description, double price) {}
+public record ItemUpdateRequest(String name, String description, Double price) {}

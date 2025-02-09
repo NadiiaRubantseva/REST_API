@@ -1,48 +1,91 @@
-package ua.edu.ztu.nadiiarubantseva.restapi.item;
+package ua.edu.ztu.nadiiarubantseva.restapi.item.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ua.edu.ztu.nadiiarubantseva.restapi.common.ApiException;
+import ua.edu.ztu.nadiiarubantseva.restapi.item.dto.ItemDTO;
+import ua.edu.ztu.nadiiarubantseva.restapi.item.dto.ItemPutRequest;
+import ua.edu.ztu.nadiiarubantseva.restapi.item.dto.ItemUpdateRequest;
+import ua.edu.ztu.nadiiarubantseva.restapi.item.mapper.ItemMapper;
+import ua.edu.ztu.nadiiarubantseva.restapi.item.model.Item;
+import ua.edu.ztu.nadiiarubantseva.restapi.item.validator.ItemErrorCode;
+import ua.edu.ztu.nadiiarubantseva.restapi.item.dto.ItemCreateRequest;
+import ua.edu.ztu.nadiiarubantseva.restapi.item.repository.ItemRepository;
+import ua.edu.ztu.nadiiarubantseva.restapi.item.validator.ItemValidator;
 
 import java.util.List;
+import java.util.Optional;
+
+import static ua.edu.ztu.nadiiarubantseva.restapi.item.mapper.ItemMapper.*;
 
 @Service
 @RequiredArgsConstructor
 public class ItemService {
+
+    private final ItemValidator itemValidator;
     private final ItemRepository itemRepository;
 
-    public Item createItem(ItemRequestDto request) {
-        if (itemRepository.existsByName(request.name())) {
-            throw new ItemNotFoundException(ItemErrorCode.ITEM_ALREADY_EXISTS);
+    public ItemDTO createItem(ItemCreateRequest request) {
+        Optional<ItemErrorCode> errorCode = itemValidator.validate(request);
+        if (errorCode.isPresent()) {
+            throw new ApiException(errorCode.get());
         }
-
-        Item item = Item.builder()
-                .name(request.name())
-                .description(request.description())
-                .price(request.price())
-                .build();
-
-        return itemRepository.save(item);
+        Item item = itemRepository.save(mapToEntity(request));
+        return mapToDTO(item);
     }
 
-    public List<Item> getAllItems() {
-        return itemRepository.findAll();
+    public List<ItemDTO> getAllItems() {
+        return itemRepository.findAll().stream()
+                .map(ItemMapper::mapToDTO)
+                .toList();
     }
 
-    public Item getItemById(Long id) {
+    public ItemDTO getItemById(Long id) {
         return itemRepository.findById(id)
-                .orElseThrow(() -> new ItemNotFoundException(ItemErrorCode.ITEM_NOT_FOUND));
+                .map(ItemMapper::mapToDTO)
+                .orElseThrow(() -> new ApiException(ItemErrorCode.ITEM_NOT_FOUND));
     }
 
-    public Item updateItem(Long id, ItemRequestDto request) {
-        Item existingItem = getItemById(id);
-        existingItem.setName(request.name());
-        existingItem.setDescription(request.description());
-        existingItem.setPrice(request.price());
-        return itemRepository.save(existingItem);
+    public ItemDTO updateItem(Long id, ItemUpdateRequest request) {
+        Optional<ItemErrorCode> errorCode = itemValidator.validate(id, request);
+        if (errorCode.isPresent()) {
+            throw new ApiException(errorCode.get());
+        }
+        Item existingItem = itemRepository.findById(id).orElseThrow();
+        if (request.name() != null) {
+            existingItem.setName(request.name());
+        }
+        if (request.description() != null) {
+            existingItem.setDescription(request.description());
+        }
+        if (request.price() != null) {
+            existingItem.setPrice(request.price());
+        }
+        return mapToDTO(itemRepository.save(existingItem));
     }
 
     public void deleteItem(Long id) {
-        Item item = getItemById(id);
-        itemRepository.delete(item);
+        Optional<ItemErrorCode> errorCode = itemValidator.validate(id);
+        if (errorCode.isPresent()) {
+            throw new ApiException(errorCode.get());
+        }
+        itemRepository.deleteById(id);
+    }
+
+    public ItemDTO replaceItem(Long id, ItemPutRequest request) {
+        Optional<ItemErrorCode> errorCode = itemValidator.validate(id, request);
+        if (errorCode.isPresent()) {
+            throw new ApiException(errorCode.get());
+        }
+        if (itemRepository.existsById(id)) {
+            Item existingItem = itemRepository.findById(id).orElseThrow();
+            existingItem.setName(request.name());
+            existingItem.setDescription(request.description());
+            existingItem.setPrice(request.price());
+            return mapToDTO(itemRepository.save(existingItem));
+        } else {
+            Item item = itemRepository.save(mapToEntity(id, request));
+            return mapToDTO(item);
+        }
     }
 }

@@ -1,9 +1,10 @@
-package ua.edu.ztu.nadiiarubantseva.restapi.security;
+package ua.edu.ztu.nadiiarubantseva.restapi.security.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -14,10 +15,11 @@ import java.util.function.Function;
 @Component
 public class JwtUtil {
 
-    private static final String SECRET_KEY = "YWRkaW5nYS1zdXBlci1zZWNyZXQta2V5LXNlY3JldC1rZXk="; // Use Base64-encoded key
+    @Value("${jwt.secret}")
+    private String secretKey;
 
     private Key getSignKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
@@ -31,7 +33,7 @@ public class JwtUtil {
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         Claims claims = Jwts.parser()
-                .verifyWith(getSignKey()) // Updated from `setSigningKey()`
+                .setSigningKey(getSignKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
@@ -46,7 +48,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1 hour expiry
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
                 .signWith(getSignKey())
                 .compact();
     }
