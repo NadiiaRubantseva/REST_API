@@ -15,7 +15,7 @@ The API is fully documented in **Postman**. You can access the documentation [he
 
 ---
 
-## To Run the Application**
+## **To Run the Application**
 Using Gradle Wrapper:
 ```sh
 ./gradlew bootRun
